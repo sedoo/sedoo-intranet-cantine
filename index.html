@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu cantine</title>
+    <style>
+        #menuCantine {
+            text-align: justify;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            position: relative;
+        }
+        #menuCantine article {
+            margin-bottom: 10px;
+        }
+        #menuCantine article:first-child {
+            /* width: 100%; */
+        }
+        #menuCantine article header {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-radius: 5px;
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            /* background-color: var(--theme-color); */
+            color:#FFF;
+
+        }
+        #menuCantine article header.today {
+            border-radius: 5px;
+            width: 120px;
+            height: 50px;
+        }
+        #menuCantine article header span {
+            display: block;
+            text-align: center;
+        }
+        #menuCantine article header span.day {
+            font-size: 1.3rem;
+        }
+
+        #menuCantine article section {
+            /* display: none; */
+            opacity: 0;
+            width: 400px;
+            position: absolute;
+            left:-99999;
+            background: #FFF;
+            border:3px solid #CCC;
+            box-shadow: 0px 0px 5px rgba(0,0,0,.5);
+            border-radius: 15px;
+            padding:10px;
+            /* z-index: 1000; */
+        }
+        #menuCantine article header:hover + section {
+            left:0;
+            top:55px;
+            opacity: 1;
+            /* display: block; */
+        }
+
+
+    </style>
+</head>
+<body>
+   
+<div id="menuCantine">
+
+</div>
+
+<script>
+//Top-level function
+async function populate() {
+
+const requestURL = 'https://timechef.elior.com/api/restaurant/1668/menus';
+const request = new Request(requestURL);
+
+const response = await fetch(request);
+const menu = await response.json();
+
+populateContainer(menu);
+}
+//Populating the header with date
+function populateContainer(obj) {
+  const container = document.querySelector('div#menuCantine');
+  
+//   const dates = obj.date;
+  let i = 0;
+//   console.log(obj);
+  for (const daily of obj) {
+    console.log(i);
+    // console.log(daily);
+    const myArticle = document.createElement('article');
+    
+    
+    const myDate = document.createElement('header');
+    
+    let customDate = new Date(daily.date);
+    customDate = Intl.DateTimeFormat("fr-FR").format(customDate);
+    customDate = customDate.split('/');
+    console.log(customDate);
+
+    const myDay = document.createElement('span');
+    myDay.classList.add('day');
+    myDay.textContent = customDate[0];
+
+    const myMonth = document.createElement('span');
+    myMonth.classList.add('month');
+    myMonth.textContent = customDate[1];
+
+    if (i == 0) {
+        const today = document.createElement('span');
+        myDate.classList.add('today');
+        today.textContent ="Aujourd'hui";
+        myDate.appendChild(today);
+    } else {
+        myDate.appendChild(myDay);
+        myDate.appendChild(myMonth);
+    }
+    i++;
+    
+
+    container.appendChild(myArticle);
+    myArticle.appendChild(myDate);
+
+    const sectionMenu = document.createElement('section');
+    myArticle.appendChild(sectionMenu);
+    for (const famillePlat of daily.famillePlats) {
+        // console.log(famillePlat.libelle);
+        const myH3 = document.createElement('h3');
+        myH3.textContent = famillePlat.libelle;
+        sectionMenu.appendChild(myH3);
+
+        const myList = document.createElement('ul');
+        for (const plat of famillePlat.plats) {
+            // console.log(plat.libelle);
+            const listItem = document.createElement('li');
+            listItem.textContent = plat.libelle;
+            myList.appendChild(listItem);
+        }
+        sectionMenu.appendChild(myList);
+    }
+  }
+}
+
+populate();
+
+</script>
+
+</body>
+</html>
